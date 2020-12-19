@@ -1,0 +1,53 @@
+
+`include "defenitions.v"
+
+module instr_exec(
+    input clk,
+    input rst,
+    input [6:0] opcode,
+    input [2:0] funct3,
+    input [6:0] funct7,
+    input [31:0] op1,
+    input [31:0] op2,
+    input [12:0] offset,
+    input [31:0] pc,
+    input [4:0] rd,
+    output reg [4:0] reg_addr,
+    output reg [31:0] reg_data,
+    output reg [31:0] mem_addr,
+    output reg mem_ren,
+    output reg mem_wen
+);
+
+always @ (posedge clk, posedge rst)
+if (rst) begin
+    reg_addr <= 0;
+end
+else if (clk) begin
+    case (opcode)
+    0: begin
+        mem_wen <= 0;
+        mem_ren <= 0;
+        reg_addr <= 0;
+    end
+    `OPCODE_OP, `OPCODE_OP_IMM: begin
+        reg_addr <= rd;
+        case (funct3)
+        `FUNCT3_ADDSUB:
+            if (!funct7) reg_data <= op1 + op2; // ADD
+            else reg_data <= op1 + ~op2 + 1'b1; // SUB
+        `FUNCT3_SLL: reg_data <= op1 << op2[4:0];
+        `FUNCT3_SLT: reg_data <= ($signed(op1) < $signed(op2)) ? 1 : 0;
+        `FUNCT3_SLTU: reg_data <= (op1 < op2) ? 1 : 0;
+        `FUNCT3_XOR: reg_data <= op1 ^ op2;
+        `FUNCT3_SRLA:
+            if (!funct7) reg_data <= op1 >> op2[4:0]; // SRL
+            else reg_data <= op1 >>> op2[4:0]; // SRA
+        `FUNCT3_OR: reg_data <= op1 | op2;
+        `FUNCT3_AND: reg_data <= op1 & op2;
+        endcase
+    end
+    endcase
+end
+
+endmodule
