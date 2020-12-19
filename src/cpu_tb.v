@@ -37,8 +37,8 @@ cpu cpu (
 );
 
 initial begin
-    $readmemh("../source_files/test1.hex", mem.m);
-    $dumpfile("riscv.vcd");
+    $readmemh("source_files/test1.hex", mem.m);
+    $dumpfile("cpu_tb.vcd");
     $dumpvars;
     #1000 $finish;
 end
