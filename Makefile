@@ -1,8 +1,8 @@
 
-.PHONY: cpu_tb
+.PHONY: core_tb
 
-cpu_tb: cpu_tb.vcd
-	gtkwave cpu_tb.vcd
+core_tb: core_tb.vcd
+	gtkwave core_tb.vcd
 
 %.vvp: src/%.v $(wildcard src/*.v)
 	cd src && iverilog -y. -o ../$@ ../$<

@@ -16,12 +16,15 @@ module instr_exec(
     output reg [31:0] reg_data,
     output reg [31:0] mem_addr,
     output reg mem_ren,
-    output reg mem_wen
+    output reg mem_wen,
+    output reg [31:0] pc_data,
+    output reg pc_set
 );
 
 always @ (posedge clk, posedge rst)
 if (rst) begin
     reg_addr <= 0;
+    pc_set <= 0;
 end
 else if (clk) begin
     case (opcode)
@@ -29,9 +32,11 @@ else if (clk) begin
         mem_wen <= 0;
         mem_ren <= 0;
         reg_addr <= 0;
+        pc_set <= 0;
     end
     `OPCODE_OP, `OPCODE_OP_IMM: begin
         reg_addr <= rd;
+        pc_set <= 0;
         case (funct3)
         `FUNCT3_ADDSUB:
             if (!funct7) reg_data <= op1 + op2; // ADD
@@ -45,6 +50,19 @@ else if (clk) begin
             else reg_data <= op1 >>> op2[4:0]; // SRA
         `FUNCT3_OR: reg_data <= op1 | op2;
         `FUNCT3_AND: reg_data <= op1 & op2;
+        endcase
+    end
+    `OPCODE_BRANCH: begin
+        reg_addr <= 0;
+        pc_data <= pc + { {19{offset[12]}}, offset[12:0] };
+        case (funct3)
+        `FUNCT3_EQ: pc_set <= op1 == op2;
+        `FUNCT3_NE: pc_set <= op1 != op2;
+        `FUNCT3_LT: pc_set <= $signed(op1) < $signed(op2);
+        `FUNCT3_GE: pc_set <= $signed(op2) >= $signed(op2);
+        `FUNCT3_LTU: pc_set <= op1 < op2;
+        `FUNCT3_GEU: pc_set <= op1 >= op2;
+        default: pc_set <= 0;
         endcase
     end
     endcase

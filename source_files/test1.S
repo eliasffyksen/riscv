@@ -1,2 +1,5 @@
-addi $1, $0, 5 # 500093
-addi $2, $1, 4 # 400113
+start:
+    addi $1, $0, 5
+    addi $2, $1, 4
+    beq $1, $2, start
+    bne $1, $2, start

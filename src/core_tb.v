@@ -1,5 +1,7 @@
 
-module cpu_tb ();
+`timescale 1ns/1ps
+
+module cor_tb ();
 
 wire [31:0] mem_data_in;
 wire [31:0] mem_addr;
@@ -26,7 +28,7 @@ memory mem (
     .data_out(mem_data_out)
 );
 
-cpu cpu (
+core core (
     .data_in(mem_data_out),
     .rst(rst),
     .clk(clk),
@@ -37,10 +39,10 @@ cpu cpu (
 );
 
 initial begin
-    $readmemh("source_files/test1.hex", mem.m);
-    $dumpfile("cpu_tb.vcd");
+    $readmemh("source_files/test.hex", mem.m);
+    $dumpfile("core_tb.vcd");
     $dumpvars;
-    #1000 $finish;
+    #10000 $finish;
 end
 
 endmodule
