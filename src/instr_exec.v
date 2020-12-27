@@ -18,7 +18,11 @@ module instr_exec(
     output reg mem_ren,
     output reg mem_wen,
     output reg [31:0] pc_data,
-    output reg pc_set
+    output reg pc_set,
+    output reg load,
+    output reg store,
+    output reg addr,
+    output reg rs // Register source passed to instr_mem
 );
 
 always @ (posedge clk, posedge rst)
@@ -28,15 +32,19 @@ if (rst) begin
 end
 else if (clk) begin
     case (opcode)
-    0: begin
+    0, default: begin
         mem_wen <= 0;
         mem_ren <= 0;
         reg_addr <= 0;
         pc_set <= 0;
+        load <= 0;
+        store <= 0;
     end
     `OPCODE_OP, `OPCODE_OP_IMM: begin
         reg_addr <= rd;
         pc_set <= 0;
+        load <= 0;
+        store <= 0;
         case (funct3)
         `FUNCT3_ADDSUB:
             if (!funct7) reg_data <= op1 + op2; // ADD
@@ -55,6 +63,8 @@ else if (clk) begin
     `OPCODE_BRANCH: begin
         reg_addr <= 0;
         pc_data <= pc + { {19{offset[12]}}, offset[12:0] };
+        load <= 0;
+        store <= 0;
         case (funct3)
         `FUNCT3_EQ: pc_set <= op1 == op2;
         `FUNCT3_NE: pc_set <= op1 != op2;
@@ -64,6 +74,12 @@ else if (clk) begin
         `FUNCT3_GEU: pc_set <= op1 >= op2;
         default: pc_set <= 0;
         endcase
+    end
+    `OPCODE_LOAD: begin
+        load <= 1;
+        store <= 0;
+        rs <= rd;
+        addr <= pc + offset;
     end
     endcase
 end

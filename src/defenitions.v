@@ -2,6 +2,8 @@
 `define OPCODE_OP       7'b0110011
 `define OPCODE_OP_IMM   7'b0010011
 `define OPCODE_BRANCH   7'b1100011
+`define OPCODE_STORE    7'b0100011
+`define OPCODE_LOAD     7'b0000011
 
 `define FUNCT3_ADDSUB   3'b000
 `define FUNCT3_SLL      3'b001
